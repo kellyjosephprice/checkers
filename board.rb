@@ -27,20 +27,19 @@ class Board
     board = player == :red ? @board.reverse : @board
     
     board.each_with_index.map do |row, rank|
-      row_str = player == :red ? "#{8 - rank} " : "#{rank + 1} "
-      
       tiles = row.each_with_index.map do |tile, file|
-        character = tile.to_s + ' '
+        string = tile.to_s + ' '
+
         
-        if red_tile? [rank, file]
-          character = character.on_light_red
+        if white_tile? [rank, file]
+          string = string.white if tile.nil?
+          string = string.on_white
         else
-          character = character.on_black
+          string = string.green if tile.nil?
+          string = string.on_green
         end
-      end
-      
-      row_str + tiles.join("") + "\n"
-    end.join("").concat('  ' + ('a'..'h').to_a.join(' '))
+      end.join("")
+    end.join("\n")
   end
   
   def move(color, start_pos, end_pos)
@@ -95,19 +94,34 @@ class Board
   end
   
   def opposing_color(color)
-    color == :red ? :black : :red
+    color == :red ? :white : :red
   end
   
   private
   
   def set_pieces
+    files = [0, 2, 4, 6]
+
+    positions = files.map { |file| [0, file] }
+    positions.concat(files.map { |file| [1, file + 1] })
+    positions.concat(files.map { |file| [2, file] })
+
+    positions.each do |pos|
+      self[pos] = Piece.new(:red, pos, self)
+    end
+
+    positions.map! do |rank, file|
+      file = (file % 2 == 0) ? file + 1 : file - 1
+      [7 - rank, file]
+    end
+
+    positions.each do |pos|
+      self[pos] = Piece.new(:white, pos, self)
+    end
   end  
   
-  def red_tile? pos
+  def white_tile? pos
     pos.rank % 2 == pos.file % 2 
   end  
 
-end
-
-class InvalidMoveError < StandardError
 end

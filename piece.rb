@@ -1,12 +1,14 @@
 require './position'
 require './board'
+require './errors'
 
 require 'colorize'
 
 class Piece
   attr_reader :color, :position
+  attr_writer :board
 
-  def initialize(color, position, board)
+  def initialize(color, position, board = nil)
     @color = color
     @position = position
     @board = board
@@ -14,24 +16,39 @@ class Piece
     @promoted = false
   end
 
-  def perform_slide position
-    unless valid_slides.include? position
-      raise InvalidMoveError.new(@position, position)
-    end
-
-    move(position)
+  def dup
+    Piece.new(@color, @position.dup)
   end
 
-  def perform_jump position
-    unless valid_jumps.include? position
-      raise InvalidMoveError.new(@position, position)
+  def valid_move_seq? sequence
+    begin
+      test_board = @board.dup
+      test_board[@position].perform_move! sequence
+    rescue
+      false
+    else
+      true
+    end
+  end
+
+  def perform_moves moves
+    unless valid_move_seq? moves
+      raise InvalidMoveError.new(@position, moves)
     end
 
-    jumped = middle_position(@position, position)
+    perform_moves! moves
+  end
 
-    @board[jumped] = nil
-
-    move(position)
+  def perform_moves! moves
+    moves.each do |pos|
+      if valid_slides.include? pos
+        perform_slide(pos)
+      elsif valid_jumps.include? pos
+        perform_jump(pos)
+      else
+        raise InvalidMoveError.new(@position, pos)
+      end
+    end
   end
 
   def valid_slides
@@ -55,11 +72,23 @@ class Piece
   end
 
   def to_s
-    sigil = (@promoted) ? "K" : "P"
-    (@color == :red) ? sigil.red : sigil.black
+    sigil = (@promoted) ? "⛃" : "⛂"
+    (@color == :red) ? sigil.red : sigil.white
   end
 
   private
+
+  def perform_slide position
+    move(position)
+  end
+
+  def perform_jump position
+    jumped = middle_position(@position, position)
+
+    @board[jumped] = nil
+
+    move(position)
+  end
 
   def move position
     @board[position] = self
@@ -108,4 +137,9 @@ class Piece
     (nums.inject(:+) / nums.size).to_i
   end
 end
-○
+
+class NilClass
+  def to_s
+    "⛀"
+  end
+end

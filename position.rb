@@ -40,9 +40,3 @@ class Array
     "#{ ('a'..'h').to_a[file] }#{ rank + 1 }"
   end
 end
-
-class NilClass
-  def to_s
-    ' '
-  end
-end
