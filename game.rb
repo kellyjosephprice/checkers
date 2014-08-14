@@ -4,6 +4,7 @@ require './board'
 require './position'
 
 require 'yaml'
+require 'readline'
 
 class Game
   attr_reader :board
@@ -61,7 +62,7 @@ class Game
   def prompt_save    
     begin
       print "Save the game (y/n)? "
-      answer = gets.chomp.downcase
+      answer = Readline.readline.strip.downcase
     end until ['y', 'n'].include? answer
     
     game.save("games/" + Time.now.strftime('%F-%T.game')) if answer == 'y'
@@ -81,9 +82,6 @@ class Game
       move = @current_player.get_move
       @board.move(@current_player.color, move[:piece], move[:sequence])
     rescue InvalidMoveError => error
-      @current_player.error(error.message)
-      retry
-    rescue InvalidMoveSequenceError => error
       @current_player.error(error.message)
       retry
     end

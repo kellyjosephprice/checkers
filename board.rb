@@ -119,7 +119,7 @@ class Board
     end
 
     positions.each do |pos|
-      self[pos] = Piece.new(:white, pos, self)
+      self[pos] = Piece.new(:white, pos, false, self)
     end
   end  
   

@@ -70,7 +70,8 @@ class Piece
 
   def valid_jumps
     offsets.reject do |offset|
-      @board[apply_offset(offset)].nil?
+      jumped = @board[apply_offset(offset)]
+      jumped.nil? || jumped.color == @color
     end.map do |offset|
       apply_offset([offset.rank * 2, offset.file * 2])
     end.select do |pos|

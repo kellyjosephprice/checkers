@@ -1,3 +1,5 @@
+require "readline"
+
 class LocalPlayer < Player
   private 
   
@@ -28,13 +30,17 @@ class LocalPlayer < Player
   def input 
     STDIN
   end
+
+  def readline
+    Readline.readline(": ", true)
+  end
   
   def prompt_move
     result = {}
     
     begin
-      prompt "Enter your move: "
-      moves = input.gets.split(' ').map do |coord|
+      prompt "Enter your move"
+      moves = readline.split(' ').map do |coord|
         parse_coordinate(coord)
       end
     rescue ArgumentError
