@@ -1,3 +1,5 @@
+require "../player"
+
 require 'json'
 
 class NetworkPlayer < Player

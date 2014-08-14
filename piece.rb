@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require './position'
 require './board'
 require './errors'
@@ -33,7 +35,7 @@ class Piece
 
   def perform_moves moves
     unless valid_move_seq? moves
-      raise InvalidMoveError.new(@position, moves)
+      raise InvalidMoveError.new()
     end
 
     perform_moves! moves
@@ -46,7 +48,7 @@ class Piece
       elsif valid_jumps.include? pos
         perform_jump(pos)
       else
-        raise InvalidMoveError.new(@position, pos)
+        raise InvalidMoveError.new
       end
     end
   end

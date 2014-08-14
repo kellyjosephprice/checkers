@@ -54,12 +54,9 @@ class Board
     if piece.nil?
       raise InvalidMoveError.new(
         "There is no piece at #{ start_pos.pgn } to move.")
-    elsif !piece.legal_moves.include?(end_pos)
-      raise InvalidMoveError.new(
-        "Piece at #{ start_pos.pgn } can't move to #{ end_pos.pgn }.")
     end
     
-    piece.move(end_pos)
+    piece.perform_moves([end_pos])
   end
   
   def dup

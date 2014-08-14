@@ -1,25 +1,8 @@
 class InvalidMoveError < StandardError
-  def initialize(source, dest)
-    @source = source
-    @dest = dest
-
-    super(move_message)
-  end
-
-  def move_message
-    "The piece #{source} cannot move to #{dest}!"
-  end
 end
 
-class InvalidMoveSequenceError < InvalidMoveSequenceError
-  def initialize(source, sequence)
-    @source = source
-    @sequence = sequence
+class InvalidMoveSequenceError < InvalidMoveError
+end
 
-    super(move_message)
-  end
-
-  def move_message
-    "The sequence of moves #{sequence} contains invalid moves!"
-  end
+class OutOfTimeError < StandardError
 end
