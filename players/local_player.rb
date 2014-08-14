@@ -1,5 +1,3 @@
-require "../player"
-
 class LocalPlayer < Player
   private 
   
@@ -36,16 +34,15 @@ class LocalPlayer < Player
     
     begin
       prompt "Enter your move: "
-      moves = input.gets.split(' ')
-    
-      start = parse_coordinate(moves[0])
-      dest = parse_coordinate(moves[1])
+      moves = input.gets.split(' ').map do |coord|
+        parse_coordinate(coord)
+      end
     rescue ArgumentError
       retry
     end
     
-    result[:start] = start
-    result[:dest] = dest
+    result[:piece] = moves.shift
+    result[:sequence] = moves
     
     result
   end

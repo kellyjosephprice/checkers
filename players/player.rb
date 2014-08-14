@@ -1,6 +1,3 @@
-require './player/local_player'
-require './player/network_player'
-  
 class Player
   attr_reader :color
     

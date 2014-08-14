@@ -9,48 +9,55 @@ require 'colorize'
 class Piece
   attr_reader :color, :position
   attr_writer :board
+  attr_accessor :promoted
 
-  def initialize(color, position, board = nil)
+  def initialize(color, position, promoted = false, board = nil)
     @color = color
     @position = position
+    @promoted = promoted
     @board = board
-
-    @promoted = false
   end
 
   def dup
-    Piece.new(@color, @position.dup)
+    Piece.new(@color, @position.dup, @promoted)
   end
 
   def valid_move_seq? sequence
     begin
       test_board = @board.dup
-      test_board[@position].perform_move! sequence
-    rescue
+      test_board[@position].perform_moves! sequence
+    rescue InvalidMoveError => error
+      @error = error.message
       false
     else
       true
     end
   end
 
-  def perform_moves moves
-    unless valid_move_seq? moves
-      raise InvalidMoveError.new()
+  def perform_moves sequence
+    unless valid_move_seq? sequence
+      raise InvalidMoveError.new(@error)
     end
 
-    perform_moves! moves
+    perform_moves! sequence
   end
 
-  def perform_moves! moves
-    moves.each do |pos|
-      if valid_slides.include? pos
+  def perform_moves! sequence
+    sequence.each do |pos|
+      if valid_slides.include?(pos) && any_jumps?
+        raise ForcedMoveError
+      elsif valid_slides.include? pos
         perform_slide(pos)
       elsif valid_jumps.include? pos
         perform_jump(pos)
       else
-        raise InvalidMoveError.new
+        raise InvalidMoveError.new("#{@position.pgn} cannot move to #{pos.pgn}")
       end
     end
+  end
+
+  def valid_moves
+    valid_slides + valid_jumps
   end
 
   def valid_slides
@@ -62,10 +69,8 @@ class Piece
   end
 
   def valid_jumps
-    slides = valid_slides
-    
     offsets.reject do |offset|
-      slides.include? apply_offset(offset)
+      @board[apply_offset(offset)].nil?
     end.map do |offset|
       apply_offset([offset.rank * 2, offset.file * 2])
     end.select do |pos|
@@ -73,8 +78,14 @@ class Piece
     end
   end
 
+  def any_jumps?
+    @board.pieces_by_color(@color).any? do |piece|
+      piece.valid_jumps.any?
+    end
+  end
+
   def to_s
-    sigil = (@promoted) ? "⛃" : "⛂"
+    sigil = (@promoted) ? "◉" : "◎"
     (@color == :red) ? sigil.red : sigil.white
   end
 
@@ -114,13 +125,7 @@ class Piece
     forward = [[1, 1], [1, -1]]
     backward = [[-1, 1], [-1, -1]]
     
-    if @promoted
-      forward + backward
-    elsif @color == :red
-      forward
-    else
-      backward
-    end
+    @promoted ? forward + backward : forward
   end
 
   def apply_offset offset
@@ -142,6 +147,6 @@ end
 
 class NilClass
   def to_s
-    "⛀"
+    " "
   end
 end

@@ -1,10 +1,12 @@
 require './errors'
+require './players'
 require './board'
-require './player'
 require './position'
 
+require 'yaml'
+
 class Game
-  attr_reader :board, :moves
+  attr_reader :board
   
   def initialize(players)
     @board = Board.new
@@ -24,7 +26,13 @@ class Game
   end
   
   def game_over?
-    !winner.nil?  
+    !winner.nil? || draw?
+  end
+
+  def draw?
+    @board.pieces_by_color(@current_player.color).none? do |piece|
+      piece.valid_moves.any?
+    end
   end
 
   def winner
@@ -50,6 +58,15 @@ class Game
     puts "done!"
   end
   
+  def prompt_save    
+    begin
+      print "Save the game (y/n)? "
+      answer = gets.chomp.downcase
+    end until ['y', 'n'].include? answer
+    
+    game.save("games/" + Time.now.strftime('%F-%T.game')) if answer == 'y'
+  end
+  
   def players
     [@red_player, @white_player]
   end
@@ -62,8 +79,7 @@ class Game
     
     begin
       move = @current_player.get_move
-      puts "#{move}"
-      make_move!(move)       
+      @board.move(@current_player.color, move[:piece], move[:sequence])
     rescue InvalidMoveError => error
       @current_player.error(error.message)
       retry
@@ -86,16 +102,6 @@ class Game
     once_for_local { |p| p.end_game }
   end
   
-  def make_move!(move)    
-    @board.move(@current_player.color, move[:start], move[:dest])
-    
-    if @board.promoting?(@current_player.color)
-      promotion = @current_player.get_promotion
-      
-      @board.promote(@current_player.color, promotion)
-    end    
-  end
-  
   def cycle_player
     @current_player = next_player
   end
@@ -110,15 +116,6 @@ class Game
     else
       yield(@current_player)
     end
-  end
-  
-  def prompt_save    
-    begin
-      print "Save the game (y/n)? "
-      answer = gets.chomp.downcase
-    end until ['y', 'n'].include? answer
-    
-    game.save("games/" + Time.now.strftime('%F-%T.game')) if answer == 'y'
   end
 end
 
@@ -142,7 +139,7 @@ if __FILE__ == $PROGRAM_NAME
   begin 
     game.play
   rescue StandardError => error
-    puts error.message    
+    puts error
     game.save("games/" + Time.now.strftime('%F-%T.yaml'))
   end
 end

@@ -24,13 +24,18 @@ class Board
   end 
   
   def to_s(player = :red)
-    board = player == :red ? @board.reverse : @board
+    reversed = player == :red
+
+    oriented_board = reversed ? @board.reverse : @board
     
-    board.each_with_index.map do |row, rank|
-      tiles = row.each_with_index.map do |tile, file|
+    rows = oriented_board.each_with_index.map do |row, rank|
+      oriented_row = reversed ? row : row.reverse 
+
+      rank_label = reversed ? "#{8 - rank} " : "#{rank + 1} "
+        
+      tiles = oriented_row.each_with_index.map do |tile, file|
         string = tile.to_s + ' '
 
-        
         if white_tile? [rank, file]
           string = string.white if tile.nil?
           string = string.on_white
@@ -39,24 +44,25 @@ class Board
           string = string.on_green
         end
       end.join("")
-    end.join("\n")
-  end
+
+      rank_label + tiles
+    end
+
+    file_label = ("a".."h").to_a.join(" ")
+    file_label.reverse! unless reversed
+      
+    (rows << "  #{file_label}").join("\n")
+  end # I'm sorry
   
-  def move(color, start_pos, end_pos)
+  # TODO move color logic to game
+  def move(color, pos, sequence)
+    piece = self[pos]
+
+    raise NoMoveError if sequence.nil? || sequence.empty?
+    raise NoPieceError.new(pos) if piece.nil?
+    raise WrongColorError.new(pos, color) if piece.color != color
     
-    if self[start_pos].color != color
-      raise InvalidMoveError.new(
-        "Piece at #{ start.pgn } does not belong to #{ @color }.")
-    end
-    
-    piece = self[start_pos]
-    
-    if piece.nil?
-      raise InvalidMoveError.new(
-        "There is no piece at #{ start_pos.pgn } to move.")
-    end
-    
-    piece.perform_moves([end_pos])
+    piece.perform_moves(sequence)
   end
   
   def dup
@@ -104,7 +110,7 @@ class Board
     positions.concat(files.map { |file| [2, file] })
 
     positions.each do |pos|
-      self[pos] = Piece.new(:red, pos, self)
+      self[pos] = Piece.new(:red, pos, false, self)
     end
 
     positions.map! do |rank, file|
