@@ -61,7 +61,6 @@ class Board
     (rows << "  #{file_label}").join("\n")
   end # I'm sorry
   
-  # TODO move color logic to game
   def move(pos, sequence)
     piece = self[pos]
 

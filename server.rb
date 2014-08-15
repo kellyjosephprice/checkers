@@ -33,6 +33,7 @@ class Server
     end
   
     Thread.start(Game.new(players)) do |game|
+      puts "Game started!"
       game.play
       puts "Game over!"
     end

@@ -11,8 +11,8 @@ class Game
   
   def initialize(players)
     @board = Board.new
-    
     @red_player, @white_player = players
+
     @current_player = @red_player
   end
 
@@ -37,8 +37,8 @@ class Game
   end
 
   def winner
-    return :white if @board.pieces_by_color(:red).empty?
-    return :red   if @board.pieces_by_color(:white).empty?
+    return @red_player   if @board.pieces_by_color(:red).empty?
+    return @white_player if @board.pieces_by_color(:white).empty?
   end
   
   def next_player
@@ -133,7 +133,6 @@ if __FILE__ == $PROGRAM_NAME
     game.prompt_save
     
     puts "Goodbye!"
-    
     exit
   end
  
@@ -141,6 +140,8 @@ if __FILE__ == $PROGRAM_NAME
     game.play
   rescue StandardError => error
     puts error
+   
+    Dir.mkdir("games") unless Dir.exists?("games")
     game.save("games/" + Time.now.strftime('%F-%T.yaml'))
   end
 end
