@@ -17,7 +17,7 @@ class Game
   end
 
   def play 
-    until game_over?
+    until over?
       render_board
       make_move
       cycle_player
@@ -26,7 +26,7 @@ class Game
     display_results
   end
   
-  def game_over?
+  def over?
     !winner.nil? || draw?
   end
 
@@ -75,17 +75,20 @@ class Game
   private
   
   def make_move
+    color = @current_player.color
     
     once_for_local { |p| p.say("#{ @current_player.color.capitalize } to play.")}
     
     begin
       move = @current_player.get_move
-      @board.move(@current_player.color, move[:piece], move[:sequence])
+      raise WrongColorError.new(move[:piece], color) if @board[move[:piece]].color != color
+
+      @board.move(move[:piece], move[:sequence])
     rescue InvalidMoveError => error
+      puts "Caught exception!"
       @current_player.error(error.message)
       retry
     end
-      
   end
     
   def display_results

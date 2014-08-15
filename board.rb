@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require './piece'
 require './position'
 require 'colorize'
@@ -32,9 +34,10 @@ class Board
       oriented_row = reversed ? row : row.reverse 
 
       rank_label = reversed ? "#{8 - rank} " : "#{rank + 1} "
+      rank_label = rank_label.on_light_black
         
       tiles = oriented_row.each_with_index.map do |tile, file|
-        string = tile.to_s + ' '
+        string = ' ' + tile.to_s + ' '
 
         if white_tile? [rank, file]
           string = string.white if tile.nil?
@@ -48,19 +51,22 @@ class Board
       rank_label + tiles
     end
 
-    file_label = ("a".."h").to_a.join(" ")
-    file_label.reverse! unless reversed
+    # NOTE: throwing in weirdly sized draught character for alignment
+    labels = ("a".."h").map do |c| 
+      '⛃'.light_black + "#{c} " 
+    end
+    labels.reverse! unless reversed
+    file_label = labels.join.on_light_black
       
     (rows << "  #{file_label}").join("\n")
   end # I'm sorry
   
   # TODO move color logic to game
-  def move(color, pos, sequence)
+  def move(pos, sequence)
     piece = self[pos]
 
     raise NoMoveError if sequence.nil? || sequence.empty?
     raise NoPieceError.new(pos) if piece.nil?
-    raise WrongColorError.new(pos, color) if piece.color != color
     
     piece.perform_moves(sequence)
   end

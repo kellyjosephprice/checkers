@@ -86,7 +86,7 @@ class Piece
   end
 
   def to_s
-    sigil = (@promoted) ? "◉" : "◎"
+    sigil = (@promoted) ? "⛃" : "⛂"
     (@color == :red) ? sigil.red : sigil.white
   end
 
@@ -148,6 +148,6 @@ end
 
 class NilClass
   def to_s
-    " "
+    "⛃"
   end
 end

@@ -26,7 +26,8 @@ class NetworkPlayer < Player
   end
   
   def input
-    @socket
+    reply = JSON.parse(@socket.gets.strip)
+    reply['move']
   end
   
   def end_game

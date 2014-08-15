@@ -20,7 +20,7 @@ class NoPieceError < InvalidMoveError
   end
 
   def message 
-    "There is no piece at #{ @pos.pgn } to move."
+    "There is no piece at #{ @pos.pgn } to move!"
   end
 end
 
@@ -31,7 +31,7 @@ class WrongColorError < InvalidMoveError
   end
 
   def message
-    "Piece at #{ @pos.pgn } does not belong to #{ @color }."
+    "The piece at #{ @pos.pgn } does not belong to #{ @color }!"
   end
 end
 
